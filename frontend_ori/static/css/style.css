@@ -1,0 +1,198 @@
+:root {
+    --primary-color: #2563eb;
+    --primary-hover: #1d4ed8;
+    --bg-light: #f8fafc;
+    --card-bg: #ffffff;
+    --text-main: #1e293b;
+    --text-muted: #64748b;
+    --status-open: #22c55e;
+    --status-waiting: #f59e0b;
+    --status-closed: #ef4444;
+    --radius-lg: 16px;
+    --radius-md: 12px;
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.1);
+    --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+    --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+}
+
+body {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    background-color: var(--bg-light);
+    color: var(--text-main);
+}
+
+.navbar {
+    background: rgba(15, 23, 42, 0.9) !important;
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 1rem 0;
+}
+
+.navbar-brand {
+    font-weight: 700;
+    letter-spacing: -0.5px;
+}
+
+.btn {
+    border-radius: var(--radius-md);
+    padding: 0.6rem 1.2rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.btn-success {
+    background-color: var(--status-open);
+    border-color: var(--status-open);
+}
+
+.btn-warning {
+    background-color: var(--status-waiting);
+    border-color: var(--status-waiting);
+    color: white !important;
+}
+
+.btn-danger {
+    background-color: var(--status-closed);
+    border-color: var(--status-closed);
+}
+
+.comanda-card {
+    background: var(--card-bg);
+    border: none;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+    position: relative;
+    border: 1px solid rgba(0,0,0,0.03);
+}
+
+.comanda-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+}
+
+.comanda-card .card-body {
+    padding: 1.5rem;
+}
+
+.comanda-card .card-title {
+    font-weight: 700;
+    font-size: 1.25rem;
+    color: var(--text-main);
+}
+
+.comanda-card .status-indicator {
+    width: 8px;
+    height: 100%;
+    position: absolute;
+    left: 0;
+    top: 0;
+}
+
+.comanda-card.status-aberta .status-indicator { background-color: var(--status-open); }
+.comanda-card.status-aguardando .status-indicator { background-color: var(--status-waiting); }
+.comanda-card.status-fechada .status-indicator { background-color: var(--status-closed); }
+
+.badge {
+    border-radius: 6px;
+    padding: 0.5em 0.8em;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.7rem;
+    letter-spacing: 0.5px;
+}
+
+.produto-btn {
+    height: auto;
+    min-height: 110px;
+    padding: 1rem;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.produto-btn:hover {
+    border-color: var(--primary-color);
+    background: #eff6ff;
+    transform: scale(1.02);
+}
+
+.produto-btn span:first-child {
+    font-weight: 600;
+    color: var(--text-main);
+}
+
+.produto-btn .preco {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    margin-top: 0;
+}
+
+.categoria-card {
+    border: none;
+    background: transparent;
+    margin-bottom: 2rem;
+}
+
+.categoria-card .card-header {
+    background: transparent;
+    border: none;
+    padding: 0 0 1rem 0;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+.item-comanda {
+    padding: 1rem;
+    background: #f8fafc;
+    border-radius: var(--radius-md);
+    margin-bottom: 0.75rem;
+    border: 1px solid #e2e8f0;
+}
+
+#total-comanda {
+    font-size: 1.5rem;
+    color: var(--primary-color);
+}
+
+.input-group .form-control {
+    border-radius: var(--radius-md);
+    padding: 0.75rem 1.2rem;
+    border: 1px solid #e2e8f0;
+    box-shadow: var(--shadow-sm);
+}
+
+.input-group .form-control:focus {
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+    border-color: var(--primary-color);
+}
+
+/* Glassmorphism for lock screen */
+.lock-screen {
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+}
+
+.lock-card {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+}
+
+@media (max-width: 768px) {
+    .container-fluid {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+}
+

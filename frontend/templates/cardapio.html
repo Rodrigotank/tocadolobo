@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cardápio Digital — {{ estabelecimento.get('nome_estabelecimento', 'Nosso Cardápio') }}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: { DEFAULT: '#b45309', light: '#fef3c7', dark: '#92400e' },
+                    },
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'system-ui', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        .category-scroll::-webkit-scrollbar { display: none; }
+        .category-scroll { -ms-overflow-style: none; scrollbar-width: none; }
+        .product-card { transition: transform 0.2s; }
+        .product-card:active { transform: scale(0.98); }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen pb-20">
+
+    <!-- Header -->
+    <header class="bg-white shadow-sm sticky top-0 z-30">
+        <div class="max-w-3xl mx-auto px-6 py-6 flex items-center justify-between">
+            <div>
+                <h1 class="text-2xl font-black text-slate-900 tracking-tight">{{ estabelecimento.get('nome_estabelecimento', 'Nosso Cardápio') }}</h1>
+                <p class="text-xs text-slate-500 font-medium uppercase tracking-widest mt-1">{{ estabelecimento.get('endereco_estabelecimento', 'Seja bem-vindo!') }}</p>
+            </div>
+            <div class="w-12 h-12 bg-amber-100 rounded-2xl flex items-center justify-center text-amber-600">
+                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+            </div>
+        </div>
+
+        <!-- Categorias Horizontal -->
+        <div class="max-w-3xl mx-auto px-4 pb-4">
+            <div class="flex gap-2 overflow-x-auto category-scroll">
+                {% for cat in cardapio %}
+                <a href="#cat-{{ loop.index }}" class="px-5 py-2.5 bg-slate-100 text-slate-600 rounded-full whitespace-nowrap text-sm font-bold hover:bg-amber-100 hover:text-amber-700 transition-all">
+                    {{ cat.categoria }}
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-3xl mx-auto px-6 py-8">
+        {% for section in cardapio %}
+        <section id="cat-{{ loop.index }}" class="mb-12">
+            <div class="flex items-center gap-3 mb-6">
+                <h2 class="text-xl font-extrabold text-slate-800">{{ section.categoria }}</h2>
+                <div class="h-px flex-1 bg-slate-200"></div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {% for prod in section.produtos %}
+                <div class="product-card bg-white rounded-3xl p-4 shadow-sm border border-slate-100 flex gap-4">
+                    <div class="w-24 h-24 bg-slate-50 rounded-2xl flex-shrink-0 overflow-hidden border border-slate-50">
+                        {% if prod.imagem_url %}
+                        <img src="{{ prod.imagem_url }}" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/200x200?text={{ prod.nome|urlencode }}'">
+                        {% else %}
+                        <div class="w-full h-full flex items-center justify-center text-slate-200">
+                            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="flex flex-col justify-between py-1">
+                        <div>
+                            <h3 class="font-bold text-slate-800 leading-snug">{{ prod.nome }}</h3>
+                            <p class="text-[10px] text-slate-400 uppercase font-bold mt-1 tracking-wider">{{ section.categoria }}</p>
+                        </div>
+                        <p class="text-lg font-black text-amber-600">R$ {{ "%.2f"|format(prod.preco)|replace('.', ',') }}</p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+        {% endfor %}
+
+        {% if not cardapio %}
+        <div class="text-center py-20">
+            <svg class="w-16 h-16 text-slate-200 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H4a2 2 0 00-2 2v7m18 0v5a2 2 0 01-2 2H4a2 2 0 01-2-2v-5m18 0l-2-2m-2-2l-2-2H8l-2 2-2 2m8 2v5"></path></svg>
+            <p class="text-slate-500 font-medium">Nenhum produto disponivel no momento.</p>
+        </div>
+        {% endif %}
+    </main>
+
+    <!-- Footer Fixo -->
+    <div class="fixed bottom-6 left-1/2 -translate-x-1/2 w-[calc(100%-48px)] max-w-md bg-slate-900 text-white rounded-full py-4 px-8 shadow-2xl flex items-center justify-between z-40">
+        <div class="flex flex-col">
+            <span class="text-[10px] text-slate-400 uppercase font-bold tracking-widest">Informacoes</span>
+            <span class="text-sm font-bold">{{ estabelecimento.get('telefone_estabelecimento', 'Consulte o garcom') }}</span>
+        </div>
+        <button class="bg-amber-600 text-white text-xs font-black px-5 py-2 rounded-full uppercase tracking-tighter">Fazer Pedido</button>
+    </div>
+
+</body>
+</html>

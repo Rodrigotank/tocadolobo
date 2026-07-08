@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Caixa — Toca do LOBO</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: { DEFAULT: '#b45309', light: '#fef3c7', dark: '#92400e' },
+                        accent: { DEFAULT: '#0f172a', soft: '#1e293b' },
+                    },
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'system-ui', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="/static/css/style.css" rel="stylesheet">
+</head>
+<body>
+
+    <!-- Tela de Bloqueio -->
+    <div id="lock-screen" class="lock-screen fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div class="lock-card rounded-3xl p-8 w-full max-w-md text-center">
+            <div class="brand-logo w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-5">
+                <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                </svg>
+            </div>
+            <h2 id="home-nome-estabelecimento" class="text-2xl font-bold text-white mb-1 brand-title">Sistema de Caixa</h2>
+            <p id="home-endereco-estabelecimento" class="text-slate-400 mb-6 text-sm">Sistema de comandas e caixa</p>
+            <div class="mb-4">
+                <select id="sys-username"
+                    class="lock-input w-full px-5 py-4 text-lg rounded-2xl focus:outline-none transition-all mb-3 bg-white/10 text-white cursor-pointer">
+                    <option value="" disabled selected>Selecione o Usuário</option>
+                </select>
+                <input type="password" id="sys-password"
+                    class="lock-input w-full px-5 py-4 text-center text-lg rounded-2xl focus:outline-none transition-all"
+                    placeholder="Senha"
+                    onkeydown="if(event.key==='Enter') tentarLogin()">
+            </div>
+            <button class="btn btn-primary w-full py-4 text-lg rounded-2xl font-semibold" onclick="tentarLogin()">
+                Entrar no sistema
+            </button>
+            <div id="login-error" class="text-red-400 mt-4 text-sm hidden font-medium">Senha incorreta</div>
+        </div>
+    </div>
+
+    <!-- Conteúdo Principal -->
+    <div class="main-content hidden" id="main-content">
+        <nav class="app-nav sticky top-0 z-40 relative">
+            <div class="max-w-7xl mx-auto px-4 py-3.5 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="brand-logo w-10 h-10 rounded-xl flex items-center justify-center">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <span id="nav-nome-estabelecimento" class="text-white font-bold text-lg brand-title block leading-tight">Toca do LOBO</span>
+                        <span class="text-slate-400 text-xs" id="user-display">Caixa</span>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3">
+                    <button class="btn btn-ghost px-4 py-2.5 rounded-xl text-sm" onclick="abrirAdminComSenha()" id="btn-admin-nav">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                        Admin
+                    </button>
+                    <button class="btn btn-ghost px-4 py-2.5 rounded-xl text-sm text-red-400 hover:text-red-300" onclick="logout()">
+                        Sair
+                    </button>
+                </div>
+            </div>
+        </nav>
+
+        <div class="max-w-7xl mx-auto px-4 py-6">
+            <!-- Tela Inicial -->
+            <div id="tela-inicial" class="animate-fade-in">
+                <button class="btn btn-success w-full py-4 text-lg font-bold rounded-2xl mb-6" onclick="showAbrirComanda()">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                    Abrir Comanda
+                </button>
+
+                <div class="mb-6 relative">
+                    <svg class="w-5 h-5 text-stone-400 absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                    <input type="text" id="busca"
+                        class="input-field pl-12 shadow-soft"
+                        placeholder="Buscar por número ou cliente..."
+                        onkeyup="buscarComandas()">
+                </div>
+
+                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-5 gap-4">
+                    <h2 class="text-xl font-bold text-stone-800">Comandas</h2>
+                    <div class="filter-group">
+                        <button class="filter-btn filter-btn-active" id="btn-filtro-abertas" onclick="filtrarComandas('abertas')">Abertas</button>
+                        <button class="filter-btn" id="btn-filtro-aguardando" onclick="filtrarComandas('aguardando')">Aguardando</button>
+                        <button class="filter-btn" id="btn-filtro-fechadas" onclick="filtrarComandas('fechadas')">Fechadas</button>
+                    </div>
+                </div>
+
+                <div id="lista-comandas" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                </div>
+            </div>
+
+            <!-- Tela Abrir Comanda -->
+            <div id="tela-abrir-comanda" class="hidden animate-fade-in">
+                <button class="mb-6 px-4 py-2.5 text-stone-600 hover:text-stone-900 font-medium flex items-center gap-2 hover:bg-stone-200/60 rounded-xl transition-all" onclick="showInicial()">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                    Voltar
+                </button>
+
+                <div class="max-w-lg mx-auto">
+                    <div class="card card-elevated rounded-3xl p-8">
+                        <div class="brand-logo w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-5">
+                            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                        </div>
+                        <h3 class="text-xl font-bold text-stone-800 mb-6 text-center">Nova Comanda</h3>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-semibold text-stone-600 mb-2">Nome do Cliente</label>
+                                <input type="text" id="cliente" class="input-field text-lg" placeholder="Ex: João Silva">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-stone-600 mb-2">Mesa <span class="font-normal text-stone-400">(opcional)</span></label>
+                                <input type="text" id="mesa" class="input-field text-lg" placeholder="Ex: 12">
+                            </div>
+                            <button class="btn btn-success w-full py-4 text-lg font-bold rounded-2xl mt-2" onclick="abrirComanda()">
+                                Abrir Comanda
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tela de Pedidos -->
+            <div id="tela-pedidos" class="hidden">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="lg:col-span-2">
+                        <button class="mb-5 px-4 py-2.5 text-stone-600 hover:text-stone-900 font-medium flex items-center gap-2 hover:bg-stone-200/60 rounded-xl transition-all" onclick="showInicial()">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                            Voltar às comandas
+                        </button>
+
+                        <div id="categorias-produtos" class="space-y-4"></div>
+
+                        <div class="card rounded-2xl p-5 mt-5">
+                            <label class="block text-sm font-semibold text-stone-600 mb-2">Observação</label>
+                            <input type="text" id="observacao" class="input-field"
+                                placeholder="Ex: Sem cebola, bem passado...">
+                        </div>
+                    </div>
+
+                    <div class="lg:col-span-1">
+                        <div class="comanda-sidebar sticky top-24">
+                            <div class="comanda-sidebar-header">
+                                <h3 id="comanda-info" class="text-white font-bold text-lg">Comanda #0</h3>
+                            </div>
+                            <div class="p-5">
+                                <div id="itens-comanda" class="max-h-72 overflow-y-auto"></div>
+                            </div>
+                            <div class="border-t border-stone-200 p-5 space-y-3 bg-stone-50/80">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-stone-500 font-medium">Total</span>
+                                    <span id="total-comanda" class="text-2xl font-extrabold text-amber-700">R$ 0,00</span>
+                                </div>
+                                <select id="largura-impressora" class="input-field text-sm py-2.5">
+                                    <option value="80" selected>Impressora 80mm</option>
+                                    <option value="58">Impressora 58mm</option>
+                                </select>
+                                <button class="btn btn-primary w-full py-3.5 rounded-xl font-semibold" onclick="imprimirComandaCompleta()">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+                                    Imprimir Comanda
+                                </button>
+                                <button class="w-full py-3.5 bg-amber-100 hover:bg-amber-200 text-amber-900 font-semibold rounded-xl transition-all flex items-center justify-center gap-2 border border-amber-200" onclick="imprimirCozinha()">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                                    Imprimir Cozinha
+                                </button>
+                                <button class="w-full py-3.5 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-xl transition-all shadow-sm" onclick="fecharComanda()">
+                                    Fechar Pedido
+                                </button>
+                                <button class="w-full py-3.5 bg-stone-200 hover:bg-stone-300 text-stone-700 font-semibold rounded-xl transition-all flex items-center justify-center gap-2" onclick="showInicial()">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                                    Voltar às Comandas
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Fechar Pedido -->
+    <div id="modalFechar" class="modal-overlay fixed inset-0 z-50 hidden items-center justify-center p-4">
+        <div class="modal-panel animate-slide-up w-full max-w-md overflow-hidden">
+            <div class="flex items-center justify-between px-6 py-5 border-b border-stone-100">
+                <h3 class="text-lg font-bold text-stone-800">Fechar Pedido</h3>
+                <button class="text-stone-400 hover:text-stone-600 p-1.5 hover:bg-stone-100 rounded-lg transition-all" onclick="fecharModal('modalFechar')">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <div class="p-6 space-y-5">
+                <div class="text-center py-5 bg-amber-50 rounded-2xl border border-amber-100">
+                    <label class="block text-sm font-medium text-amber-800/70 mb-1">Total a Pagar</label>
+                    <p id="modal-total" class="text-4xl font-extrabold text-stone-900">R$ 0,00</p>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-stone-600 mb-2">Forma de Pagamento</label>
+                    <select id="forma-pagamento" class="input-field">
+                        <option value="marcar">Marcar (pagar depois)</option>
+                        <option value="dinheiro">Dinheiro</option>
+                        <option value="pix">PIX</option>
+                        <option value="cartao">Cartão</option>
+                    </select>
+                </div>
+                <div id="valor-pago-container">
+                    <label class="block text-sm font-semibold text-stone-600 mb-2">Valor Pago</label>
+                    <input type="number" id="valor-pago" step="0.01" class="input-field">
+                    <div class="mt-3 p-3 bg-emerald-50 rounded-xl border border-emerald-100 flex items-center justify-between">
+                        <span class="text-emerald-700 font-medium">Troco</span>
+                        <span id="troco" class="text-emerald-700 font-bold text-lg">R$ 0,00</span>
+                    </div>
+                </div>
+            </div>
+            <div class="flex gap-3 px-6 py-5 border-t border-stone-100 bg-stone-50">
+                <button class="flex-1 py-3.5 bg-stone-200 hover:bg-stone-300 text-stone-700 font-semibold rounded-xl transition-all" onclick="fecharModal('modalFechar')">Cancelar</button>
+                <button class="btn btn-primary flex-1 py-3.5 rounded-xl font-semibold" onclick="confirmarFechamento()">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Resumo -->
+    <div id="modalResumo" class="modal-overlay fixed inset-0 z-50 hidden items-center justify-center p-4">
+        <div class="modal-panel animate-slide-up w-full max-w-md overflow-hidden max-h-[90vh] flex flex-col">
+            <div class="flex items-center justify-between px-6 py-5 border-b border-stone-100">
+                <h3 id="modalResumoTitle" class="text-lg font-bold text-stone-800">Resumo da Venda</h3>
+                <button class="text-stone-400 hover:text-stone-600 p-1.5 hover:bg-stone-100 rounded-lg transition-all" onclick="fecharModal('modalResumo')">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <div id="resumo-corpo" class="p-6 overflow-y-auto flex-1"></div>
+            <div class="flex gap-3 px-6 py-5 border-t border-stone-100 bg-stone-50">
+                <button class="flex-1 py-3.5 bg-stone-200 hover:bg-stone-300 text-stone-700 font-semibold rounded-xl transition-all" onclick="fecharModal('modalResumo')">Fechar</button>
+                <button class="btn btn-primary flex-1 py-3.5 rounded-xl font-semibold" id="btn-imprimir-resumo">Imprimir</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Containers de Impressão -->
+    <div id="print-cozinha-58" class="print-container">
+        <div style="font-family: 'Courier New', Courier, monospace; width: 180px; padding: 5px; line-height: 1.4;">
+            <div style="text-align: center; font-weight: bold; font-size: 14px; margin-bottom: 5px;">━━━━━━━━━━━━━━━</div>
+            <div style="text-align: center; font-weight: bold; font-size: 12px; margin-bottom: 5px;">COMANDA COZINHA</div>
+            <div style="text-align: center; font-weight: bold; font-size: 14px; margin-bottom: 5px;">━━━━━━━━━━━━━━━</div>
+            <div style="margin: 3px 0; font-size: 11px;"><strong>Cliente:</strong> <span id="print-cliente-58"></span></div>
+            <div style="margin: 3px 0; font-size: 11px;"><strong>Comanda:</strong> #<span id="print-numero-58"></span></div>
+            <div style="margin: 3px 0; font-size: 11px;"><strong>Hora:</strong> <span id="print-hora-58"></span></div>
+            <div style="text-align: center; margin: 8px 0; font-size: 12px;">─────────────</div>
+            <div id="print-itens-58" style="font-size: 11px;"></div>
+            <div style="text-align: center; margin: 8px 0; font-size: 14px;">━━━━━━━━━━━━━━━</div>
+            <div style="text-align: center; font-size: 10px; margin-top: 5px;">--- FIM ---</div>
+            <div style="height: 20px;"></div>
+        </div>
+    </div>
+
+    <div id="print-cozinha-80" class="print-container">
+        <div style="font-family: 'Courier New', Courier, monospace; width: 300px; padding: 5px; line-height: 1.4;">
+            <div style="text-align: center; font-weight: bold; font-size: 16px; margin-bottom: 5px;">━━━━━━━━━━━━━━━━━━━━━━━━━━━━</div>
+            <div style="text-align: center; font-weight: bold; font-size: 14px; margin-bottom: 5px;">COMANDA COZINHA</div>
+            <div style="text-align: center; font-weight: bold; font-size: 16px; margin-bottom: 5px;">━━━━━━━━━━━━━━━━━━━━━━━━━━━━</div>
+            <div style="margin: 3px 0; font-size: 12px;"><strong>Cliente:</strong> <span id="print-cliente-80"></span></div>
+            <div style="margin: 3px 0; font-size: 12px;"><strong>Comanda:</strong> #<span id="print-numero-80"></span></div>
+            <div style="margin: 3px 0; font-size: 12px;"><strong>Hora:</strong> <span id="print-hora-80"></span></div>
+            <div style="text-align: center; margin: 8px 0; font-size: 14px;">────────────────────────────</div>
+            <div style="display: flex; justify-content: space-between; font-weight: bold; margin-bottom: 5px; font-size: 12px;">
+                <span style="flex: 1;">Item</span>
+                <span style="width: 40px; text-align: right;">Qtd</span>
+            </div>
+            <div id="print-itens-80" style="font-size: 12px;"></div>
+            <div style="text-align: center; margin: 8px 0; font-size: 14px;">━━━━━━━━━━━━━━━━━━━━━━━━━━━━</div>
+            <div style="text-align: center; font-size: 10px; margin-top: 5px;">--- FIM ---</div>
+            <div style="height: 30px;"></div>
+        </div>
+    </div>
+
+    <div id="print-recibo-58" class="print-container">
+        <div style="font-family: 'Courier New', Courier, monospace; width: 180px; padding: 5px; line-height: 1.4;">
+            <div style="text-align: center; font-weight: bold; font-size: 14px; margin-bottom: 5px;">━━━━━━━━━━━━━━━</div>
+            <div style="text-align: center; font-weight: bold; font-size: 12px; margin-bottom: 2px;">RESUMO DA COMANDA</div>
+            <div style="text-align: center; font-weight: bold; font-size: 14px; margin-bottom: 5px;">━━━━━━━━━━━━━━━</div>
+            <div style="margin: 3px 0; font-size: 11px;"><strong>Comanda:</strong> #<span id="recibo-numero-58"></span></div>
+            <div style="margin: 3px 0; font-size: 11px;"><strong>Cliente:</strong> <span id="recibo-cliente-58"></span></div>
+            <div style="margin: 3px 0; font-size: 11px;"><strong>Data:</strong> <span id="recibo-data-58"></span></div>
+            <div style="margin: 3px 0; font-size: 11px;"><strong>Status:</strong> <span id="recibo-status-58"></span></div>
+            <div style="text-align: center; margin: 8px 0; font-size: 12px;">─────────────</div>
+            <div style="display: flex; justify-content: space-between; font-weight: bold; margin-bottom: 5px; font-size: 10px;">
+                <span style="flex: 1;">Item</span>
+                <span style="width: 25px; text-align: center;">Qtd</span>
+                <span style="width: 60px; text-align: right;">Total</span>
+            </div>
+            <div id="recibo-itens-58" style="font-size: 10px;"></div>
+            <div style="text-align: center; margin: 8px 0; font-size: 14px;">━━━━━━━━━━━━━━━</div>
+            <div style="font-weight: bold; font-size: 12px; text-align: right;"><strong>TOTAL: R$ <span id="recibo-total-58"></span></strong></div>
+            <div style="margin: 5px 0; font-size: 10px;"><strong>Pagamento:</strong> <span id="recibo-pagamento-58"></span></div>
+            <div style="text-align: center; font-size: 10px; margin-top: 10px;">--- OBRIGADO PELA PREFERÊNCIA ---</div>
+            <div style="height: 20px;"></div>
+        </div>
+    </div>
+
+    <div id="print-recibo-80" class="print-container">
+        <div style="font-family: 'Courier New', Courier, monospace; width: 300px; padding: 5px; line-height: 1.4;">
+            <div style="text-align: center; font-weight: bold; font-size: 16px; margin-bottom: 5px;">━━━━━━━━━━━━━━━━━━━━━━━━━━━━</div>
+            <div style="text-align: center; font-weight: bold; font-size: 14px; margin-bottom: 2px;">RESUMO DA COMANDA</div>
+            <div style="text-align: center; font-weight: bold; font-size: 16px; margin-bottom: 5px;">━━━━━━━━━━━━━━━━━━━━━━━━━━━━</div>
+            <div style="margin: 3px 0; font-size: 12px;"><strong>Comanda:</strong> #<span id="recibo-numero-80"></span></div>
+            <div style="margin: 3px 0; font-size: 12px;"><strong>Cliente:</strong> <span id="recibo-cliente-80"></span></div>
+            <div style="margin: 3px 0; font-size: 12px;"><strong>Data:</strong> <span id="recibo-data-80"></span></div>
+            <div style="margin: 3px 0; font-size: 12px;"><strong>Status:</strong> <span id="recibo-status-80"></span></div>
+            <div style="text-align: center; margin: 8px 0; font-size: 14px;">────────────────────────────</div>
+            <div style="display: flex; justify-content: space-between; font-weight: bold; margin-bottom: 5px; font-size: 11px;">
+                <span style="flex: 1;">Item</span>
+                <span style="width: 30px; text-align: center;">Qtd</span>
+                <span style="width: 75px; text-align: right;">Total</span>
+            </div>
+            <div id="recibo-itens-80" style="font-size: 11px;"></div>
+            <div style="text-align: center; margin: 8px 0; font-size: 16px;">━━━━━━━━━━━━━━━━━━━━━━━━━━━━</div>
+            <div style="font-weight: bold; font-size: 14px; text-align: right;"><strong>TOTAL: R$ <span id="recibo-total-80"></span></strong></div>
+            <div style="margin: 5px 0; font-size: 11px;"><strong>Pagamento:</strong> <span id="recibo-pagamento-80"></span></div>
+            <div style="text-align: center; font-size: 11px; margin-top: 15px;">--- OBRIGADO PELA PREFERÊNCIA ---</div>
+            <div style="height: 30px;"></div>
+        </div>
+    </div>
+
+    <div id="print-comanda-58" class="print-container">
+        <div style="font-family: 'Courier New', Courier, monospace; width: 180px; padding: 5px; line-height: 1.4;">
+            <div style="text-align: center; font-weight: bold; font-size: 14px; margin-bottom: 5px;">━━━━━━━━━━━━━━━</div>
+            <div style="text-align: center; font-weight: bold; font-size: 12px; margin-bottom: 2px;">COMANDA</div>
+            <div style="text-align: center; font-weight: bold; font-size: 14px; margin-bottom: 5px;">━━━━━━━━━━━━━━━</div>
+            <div style="margin: 3px 0; font-size: 11px;"><strong>Comanda:</strong> #<span id="comanda-aberta-numero-58"></span></div>
+            <div style="margin: 3px 0; font-size: 11px;"><strong>Cliente:</strong> <span id="comanda-aberta-cliente-58"></span></div>
+            <div style="margin: 3px 0; font-size: 11px;"><strong>Data:</strong> <span id="comanda-aberta-data-58"></span></div>
+            <div style="text-align: center; margin: 8px 0; font-size: 12px;">─────────────</div>
+            <div style="display: flex; justify-content: space-between; font-weight: bold; margin-bottom: 5px; font-size: 10px;">
+                <span style="flex: 1;">Item</span>
+                <span style="width: 25px; text-align: center;">Qtd</span>
+                <span style="width: 60px; text-align: right;">Total</span>
+            </div>
+            <div id="comanda-aberta-itens-58" style="font-size: 10px;"></div>
+            <div style="text-align: center; margin: 8px 0; font-size: 14px;">━━━━━━━━━━━━━━━</div>
+            <div style="font-weight: bold; font-size: 12px; text-align: right;"><strong>TOTAL: R$ <span id="comanda-aberta-total-58"></span></strong></div>
+            <div style="height: 20px;"></div>
+        </div>
+    </div>
+
+    <div id="print-comanda-80" class="print-container">
+        <div style="font-family: 'Courier New', Courier, monospace; width: 300px; padding: 5px; line-height: 1.4;">
+            <div style="text-align: center; font-weight: bold; font-size: 16px; margin-bottom: 5px;">━━━━━━━━━━━━━━━━━━━━━━━━━━━━</div>
+            <div style="text-align: center; font-weight: bold; font-size: 14px; margin-bottom: 2px;">COMANDA</div>
+            <div style="text-align: center; font-weight: bold; font-size: 16px; margin-bottom: 5px;">━━━━━━━━━━━━━━━━━━━━━━━━━━━━</div>
+            <div style="margin: 3px 0; font-size: 12px;"><strong>Comanda:</strong> #<span id="comanda-aberta-numero-80"></span></div>
+            <div style="margin: 3px 0; font-size: 12px;"><strong>Cliente:</strong> <span id="comanda-aberta-cliente-80"></span></div>
+            <div style="margin: 3px 0; font-size: 12px;"><strong>Data:</strong> <span id="comanda-aberta-data-80"></span></div>
+            <div style="text-align: center; margin: 8px 0; font-size: 14px;">────────────────────────────</div>
+            <div style="display: flex; justify-content: space-between; font-weight: bold; margin-bottom: 5px; font-size: 11px;">
+                <span style="flex: 1;">Item</span>
+                <span style="width: 30px; text-align: center;">Qtd</span>
+                <span style="width: 75px; text-align: right;">Total</span>
+            </div>
+            <div id="comanda-aberta-itens-80" style="font-size: 11px;"></div>
+            <div style="text-align: center; margin: 8px 0; font-size: 16px;">━━━━━━━━━━━━━━━━━━━━━━━━━━━━</div>
+            <div style="font-weight: bold; font-size: 14px; text-align: right;"><strong>TOTAL: R$ <span id="comanda-aberta-total-80"></span></strong></div>
+            <div style="height: 30px;"></div>
+        </div>
+    </div>
+
+    <script src="/static/js/app.js"></script>
+</body>
+</html>

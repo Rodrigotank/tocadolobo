@@ -1,0 +1,19 @@
+# Dados sensíveis
+.env
+*.db
+*.sqlite
+*.sqlite3
+
+# Arquivos temporários
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Streamlit
+.streamlit/secrets.toml
+
+# Outros
+.DS_Store
+backups/
+uploads/

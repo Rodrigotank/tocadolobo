@@ -1,0 +1,9 @@
+{
+  "tipo": "esp32",
+  "usb_vendor_id": null,
+  "usb_product_id": null,
+  "largura": 80,
+  "ativada": true,
+  "ip": "192.168.88.29",
+  "porta": 9100
+}
